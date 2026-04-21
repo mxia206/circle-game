@@ -280,6 +280,11 @@ public class GameServer extends WebSocketServer {
                 if (proj.type.equals("clusterfireball") || proj.type.equals("lightningball")) {
                     proj.time = 0;
                 }
+                //iceblade stops on hit and sucks in player
+                if (proj.type.equals("iceblade") && proj.time > 45) {
+                    pl.x = proj.x; pl.y = proj.y;
+                    proj.time = 45;
+                }
             }
         }
     }
