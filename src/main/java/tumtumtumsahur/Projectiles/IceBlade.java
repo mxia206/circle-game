@@ -9,14 +9,14 @@ public class IceBlade extends Projectile {
         super(id, x_pos, y_pos, 70.0*Math.cos(dir), 70.0*Math.sin(dir), 70.0, pl);
         this.time = 50;
         this.radius = 50.0;
-        this.damage = 20.0;
+        this.damage = 10.0;
         this.slow = 0.2;
         this.slow_time = 10;
         this.type = "iceblade";
     }
 
     public void update() {
-        if (this.time <= 48) {
+        if (this.time <= 45) {
             this.x_vel = 0.0; this.y_vel = 0.0;
             if (this.time % 5 == 0) {
                 this.hitPlayers.clear();
