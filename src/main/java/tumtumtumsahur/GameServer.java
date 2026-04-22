@@ -29,8 +29,8 @@ public class GameServer extends WebSocketServer {
      * constructs new server
      */
     public GameServer() {
-        super(new InetSocketAddress("0.0.0.0", getEnvPort()));
-        //super(new InetSocketAddress("localhost", 8080));
+        //super(new InetSocketAddress("0.0.0.0", getEnvPort()));
+        super(new InetSocketAddress("localhost", 8080));
         this.gameLoopInterval = new Timer(true);
         this.objectMapper = new ObjectMapper();
         this.playerSessions = new ConcurrentHashMap<>();
@@ -65,8 +65,7 @@ public class GameServer extends WebSocketServer {
     }
 
     private void playerJoinSession(WebSocket ws, JsonNode jsonNode) {
-        int sessionNumber = new Random().nextInt(2);
-        System.out.println("player joining session " + sessionNumber);
+        int sessionNumber = jsonNode.get("session").asInt();
         GameSession session = sessions.get(sessionNumber);
         playerSessions.put(ws, sessionNumber);
         session.handleJoin(ws, jsonNode);
