@@ -29,8 +29,8 @@ public class GameServer extends WebSocketServer {
      * constructs new server
      */
     public GameServer() {
-        //super(new InetSocketAddress("0.0.0.0", getEnvPort()));
-        super(new InetSocketAddress("localhost", 8080));
+        super(new InetSocketAddress("0.0.0.0", getEnvPort()));
+        //super(new InetSocketAddress("localhost", 8080));
         this.gameLoopInterval = new Timer(true);
         this.objectMapper = new ObjectMapper();
         this.playerSessions = new ConcurrentHashMap<>();
