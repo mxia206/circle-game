@@ -6,12 +6,18 @@ import java.util.*;
  * Template for player classes
  */
 public abstract class Player extends Circle {    
+    //attributes
     String name; 
     public String gameClass;
+    public int team = 0;
+
+    //stats
     public double health = 100.0;
     public double mana = 100.0;
     public double mana_regen;
     public double health_regen;
+
+    //status
     public double last_dir;
     public double dir;
     public double timeFromLastHit;

@@ -50,33 +50,48 @@ public class GameSession {
         switch (gameClass) {
             case "fire":
                 player = new Fire(playerID, name, locx, locy);
-                players.put(ws, player);
                 break;
             case "ice":
                 player = new Ice(playerID, name, locx, locy);
-                players.put(ws, player);
                 break;
             case "earth":
                 player = new Earth(playerID, name, locx, locy);
-                players.put(ws, player);
                 break;
             case "blood":
                 player = new Blood(playerID, name, locx, locy);
-                players.put(ws, player);
                 break;
             case "lightning":
                 player = new Lightning(playerID, name, locx, locy);
-                players.put(ws, player);
                 break;
             default:
                 System.out.println("Error: class " + gameClass + " does not exist");
+                return;
         }  
+        if (gamemode == 1) {
+            player.team = findSmallestTeam();
+        }
+        players.put(ws, player);
         ObjectNode response = objectMapper.createObjectNode();
         response.put("type", "init");
         response.put("id", playerID);
         ws.send(response.toString());
 
         System.out.println("Player joined: " + name + " (" + playerID + ")" + "at: " + java.time.LocalDate.now());
+    }
+
+    private int findSmallestTeam() {
+        Map<Integer, Integer> teamSizes = new HashMap<>();
+        //insert each team into map with size 0
+        if (gamemode == 1) {
+            for (int i = 0; i < 2; i++) {
+                teamSizes.put(i, 0);
+            }
+        }
+        //count team sizes
+        for (Player player : players.values()) {
+            teamSizes.put(player.team, teamSizes.getOrDefault(player.team, 0) + 1);
+        }
+        return teamSizes.entrySet().stream().min(Comparator.comparingInt(Map.Entry::getValue)).get().getKey();
     }
     
     private void createProjectile(Set<Projectile> newproj) {
@@ -97,7 +112,7 @@ public class GameSession {
         if (swp != null) {
             for (WebSocket oppws : players.keySet()) {
                 Player opp = players.get(oppws);
-                if (opp.id != pl.id && swp.collision(opp)) {
+                if (opp.id != pl.id && swp.collision(opp) && !(gamemode == 1 && opp.team == pl.team)) {
                     if (opp.invincible_time == 0) {
                         opp.health -= swp.damage;
                         opp.stun_time = swp.stun_time;
@@ -213,7 +228,7 @@ public class GameSession {
         Player pl = players.get(ws);
         if (pl == null) return;
         for (Projectile proj : projectiles) {
-            if (!proj.hitPlayers.contains(pl.id) && pl.collision(proj)) {
+            if (!proj.hitPlayers.contains(pl.id) && pl.collision(proj) && !(gamemode == 1 && proj.myPlayer.team == pl.team)) {
                 if (pl.invincible_time == 0) {
                     pl.health -= proj.damage;
                     //blood class shit
@@ -313,6 +328,7 @@ public class GameSession {
             players.values().stream().map(pl ->
                 Map.ofEntries(
                     Map.entry("id", pl.id),
+                    Map.entry("team", pl.team),
                     Map.entry("x", pl.x),
                     Map.entry("y", pl.y),
                     Map.entry("name", pl.name),
@@ -375,6 +391,7 @@ public class GameSession {
                     "radius", ob.radius)).toList())
         );
         resp.put("sessionId", sessionId);
+        resp.put("gamemode", gamemode);
         String msg = resp.toString();
         return msg;
     }

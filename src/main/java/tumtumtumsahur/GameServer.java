@@ -29,8 +29,7 @@ public class GameServer extends WebSocketServer {
      * constructs new server
      */
     public GameServer() {
-        super(new InetSocketAddress("0.0.0.0", getEnvPort()));
-        //super(new InetSocketAddress("localhost", 8080));
+        super(new InetSocketAddress(getBindAddress(), getEnvPort()));
         this.gameLoopInterval = new Timer(true);
         this.objectMapper = new ObjectMapper();
         this.playerSessions = new ConcurrentHashMap<>();
@@ -42,7 +41,11 @@ public class GameServer extends WebSocketServer {
 
     private static int getEnvPort() {
         String portEnv = System.getenv("PORT");
-        return portEnv != null ? Integer.parseInt(portEnv) : 4269;
+        return portEnv != null ? Integer.parseInt(portEnv) : 8080;
+    }
+
+    private static String getBindAddress() {
+        return System.getenv("PORT") != null ? "0.0.0.0" : "localhost";
     }
 
     @Override
