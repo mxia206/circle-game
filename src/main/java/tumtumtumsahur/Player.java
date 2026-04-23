@@ -16,6 +16,7 @@ public abstract class Player extends Circle {
     public double mana = 100.0;
     public double mana_regen;
     public double health_regen;
+    public double defense_mult = 1.0;
 
     //status
     public double last_dir;
@@ -32,6 +33,7 @@ public abstract class Player extends Circle {
     public int skill2maxcd;
     public int skill3maxcd;
     public int basicMeleeCD = 0;
+    public int combat_time = 0;
     public int slow_time = 0;
     public int stun_time = 0;
     public int invincible_time = 0;
@@ -133,7 +135,7 @@ public abstract class Player extends Circle {
         if (isHitting && System.currentTimeMillis() - timeFromLastHit >= 400) {
             isHitting = false;
         }  
-        if (health < 100.0) {
+        if (health < 100.0 && (combat_time == 0 || gameClass.equals("blood"))) {
             health = Math.min(100.0, health+health_regen);
         }
         if (skill1cd > 0) {
@@ -162,6 +164,9 @@ public abstract class Player extends Circle {
         }
         if (lightingspeed_time > 0) {
             lightingspeed_time--;
+        }
+        if (combat_time > 0) {
+            combat_time--;
         }
     }
 

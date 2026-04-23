@@ -16,10 +16,11 @@ public class Earth extends Player {
         health_regen = 0.5;
         this.gameClass = "earth";
         this.max_vel = 33.0;
+        this.defense_mult = 0.8;
 
         this.skill1maxcd = 30;
         this.skill2maxcd = 50;
-        this.skill3maxcd = 120;
+        this.skill3maxcd = 100;
     }
 
      //enhanced melee attack
@@ -27,7 +28,7 @@ public class Earth extends Player {
         if (basicMeleeCD > 0) return null;
         this.basicMeleeCD += 5;
         if (basicEnhanced) {
-            Sweep res = new Sweep(this.x, this.y, dir, 100.0, Math.PI*1.2, 40.0);
+            Sweep res = new Sweep(this.x, this.y, dir, 100.0, Math.PI*1.2, 30.0);
             res.stun_time = 10;
             skill1cd = skill1maxcd;
             basicEnhanced = false;

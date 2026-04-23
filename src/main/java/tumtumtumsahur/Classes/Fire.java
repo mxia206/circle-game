@@ -13,12 +13,12 @@ public class Fire extends Player {
     public Fire(String id, String name, double x, double y) {
         super(id,name, x, y);
         mana_regen = 2.0;
-        health_regen = 0.3;
+        health_regen = 0.5;
         this.gameClass = "fire";
 
         this.skill1maxcd = 2;
         this.skill2maxcd = 5;
-        this.skill3maxcd = 50;
+        this.skill3maxcd = 100;
     }
     
 
@@ -48,7 +48,7 @@ public class Fire extends Player {
 
     //big slow cluster fireball
     public Set<Projectile>  skill_3 (double dir) {
-        double manacost = 70.0;
+        double manacost = 90.0;
         if (mana <= manacost || skill3cd > 0) {
             return null;
         }

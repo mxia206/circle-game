@@ -21,9 +21,10 @@ public class LightningBall extends Projectile {
         return angle;
     }
 
-    public void computeHoming(Collection<Player> c) {
+    public void computeHoming(Collection<Player> c, int gamemode) {
         Player closestPlayer = null; double dist = 10000.0;
         for (Player pl : c) {
+            if (gamemode == 1 && pl.team == this.myPlayer.team) continue;
             if (pl.id != this.myPlayer.id && Math.hypot(pl.x-this.x, pl.y-this.y) < dist) {
                 closestPlayer = pl;
                 dist =  Math.hypot(pl.x-this.x, pl.y-this.y);

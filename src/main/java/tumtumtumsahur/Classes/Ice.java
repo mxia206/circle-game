@@ -13,7 +13,7 @@ public class Ice extends Player {
     public Ice(String id, String name, double x, double y) {
         super(id,name, x, y);
         mana_regen = 2.0;
-        health_regen = 0.3;
+        health_regen = 0.5;
         this.gameClass = "ice";
 
         this.skill1maxcd = 10;

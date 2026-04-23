@@ -114,18 +114,21 @@ public class GameSession {
                 Player opp = players.get(oppws);
                 if (opp.id != pl.id && swp.collision(opp) && !(gamemode == 1 && opp.team == pl.team)) {
                     if (opp.invincible_time == 0) {
-                        opp.health -= swp.damage;
-                        opp.stun_time = swp.stun_time;
+                        double dmg_dealt = swp.damage * opp.defense_mult;
                         //blood class shit
                         if (opp.frenzy_time > 0) {
-                            opp.health -= swp.damage * 0.3;
+                            dmg_dealt *= 1.3;
                         }
+                        opp.health -= dmg_dealt;
+                        opp.stun_time = swp.stun_time;
+                        //more blood class shit
                         if (pl.gameClass.equals("blood")) {
                             pl.health = Math.min(100.0, pl.health+10);
                             if (pl.frenzy_time > 0) {
                                 pl.health = Math.min(100.0, pl.health+5);
                             }
                         }
+                        opp.combat_time = 50;
                     }
                     if (opp.health <= 0.0) {
                         pl.killcount++;
@@ -133,6 +136,43 @@ public class GameSession {
                         return;
                     }
                 }
+            }
+        }
+    }
+
+    private void playerProjectileCollisions(WebSocket ws) {
+        Player pl = players.get(ws);
+        if (pl == null) return;
+        for (Projectile proj : projectiles) {
+            if (!proj.hitPlayers.contains(pl.id) && pl.collision(proj) && !(gamemode == 1 && proj.myPlayer.team == pl.team)) {
+                if (pl.invincible_time == 0) {
+                    double dmg_dealt = proj.damage * pl.defense_mult;
+                    //blood class shit
+                    if (pl.frenzy_time > 0) {
+                        dmg_dealt *= 1.3;
+                    }
+                    pl.health -= dmg_dealt;
+                    //check projectile effects
+                    pl.slow = proj.slow;
+                    pl.slow_time = proj.slow_time;
+                    pl.stun_time = proj.stun_time;
+                }
+                proj.hitPlayers.add(pl.id);
+                if (pl.health <= 0.0) {
+                    proj.myPlayer.killcount++;
+                    removePlayer(ws);
+                    return;
+                }
+                //some proj types end on impact
+                if (proj.type.equals("clusterfireball") || proj.type.equals("lightningball")) {
+                    proj.time = 0;
+                }
+                //iceblade stops on hit and sucks in player
+                if (proj.type.equals("iceblade") && proj.time > 45) {
+                    pl.x = proj.x; pl.y = proj.y;
+                    proj.time = 45;
+                }
+                pl.combat_time = 50;
             }
         }
     }
@@ -226,41 +266,6 @@ public class GameSession {
         }
     }  
 
-    private void playerProjectileCollisions(WebSocket ws) {
-        Player pl = players.get(ws);
-        if (pl == null) return;
-        for (Projectile proj : projectiles) {
-            if (!proj.hitPlayers.contains(pl.id) && pl.collision(proj) && !(gamemode == 1 && proj.myPlayer.team == pl.team)) {
-                if (pl.invincible_time == 0) {
-                    pl.health -= proj.damage;
-                    //blood class shit
-                    if (pl.frenzy_time > 0) {
-                        pl.health -= proj.damage * 0.3;
-                    }
-                    //check projectile effects
-                    pl.slow = proj.slow;
-                    pl.slow_time = proj.slow_time;
-                    pl.stun_time = proj.stun_time;
-                }
-                proj.hitPlayers.add(pl.id);
-                if (pl.health <= 0.0) {
-                    proj.myPlayer.killcount++;
-                    removePlayer(ws);
-                    return;
-                }
-                //some proj types end on impact
-                if (proj.type.equals("clusterfireball") || proj.type.equals("lightningball")) {
-                    proj.time = 0;
-                }
-                //iceblade stops on hit and sucks in player
-                if (proj.type.equals("iceblade") && proj.time > 45) {
-                    pl.x = proj.x; pl.y = proj.y;
-                    proj.time = 45;
-                }
-            }
-        }
-    }
-
     private void projectileObstacleCollisions(Projectile proj) {
         if (proj == null) return;
         if (proj.type.equals("snowstorm") || proj.type.equals("shockwave")) return;
@@ -303,7 +308,7 @@ public class GameSession {
         for (Projectile p : projectiles) {
             projectileObstacleCollisions(p);
             if (p.type.equals("lightningball")) {
-                ((LightningBall)p).computeHoming(players.values());
+                ((LightningBall)p).computeHoming(players.values(), gamemode);
             }
             p.update();
             if (p.time <= 0) {
