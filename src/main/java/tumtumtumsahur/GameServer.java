@@ -123,7 +123,7 @@ public class GameServer extends WebSocketServer {
         if (session == null) {
             return;
         }
-        session.removePlayer(ws, code, reason, remote);
+        session.removePlayer(ws);
         
     }
 

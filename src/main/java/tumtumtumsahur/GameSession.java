@@ -129,7 +129,7 @@ public class GameSession {
                     }
                     if (opp.health <= 0.0) {
                         pl.killcount++;
-                        players.remove(oppws);
+                        removePlayer(oppws);
                         return;
                     }
                 }
@@ -195,9 +195,11 @@ public class GameSession {
         }
     }
 
-    public void removePlayer(WebSocket ws, int code, String reason, boolean remote) { // why the fuck do we need to include
-                                                                                 // all the args if we arent gonna use
-                                                                                 // them
+    public void removePlayer(WebSocket ws) {
+        if (ws.isOpen()) {
+            ws.send("{\"type\": \"death\"}");
+        }
+        System.out.println("Player removed: " + ws);
         players.remove(ws); // what the hell this is way beter then finding the index and slicing it out
     }
 
@@ -243,7 +245,7 @@ public class GameSession {
                 proj.hitPlayers.add(pl.id);
                 if (pl.health <= 0.0) {
                     proj.myPlayer.killcount++;
-                    players.remove(ws);
+                    removePlayer(ws);
                     return;
                 }
                 //some proj types end on impact
