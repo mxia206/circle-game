@@ -7,6 +7,6 @@ RUN mvn clean package
 # Runtime stage with only Java
 FROM openjdk:17.0.1-jdk-slim
 WORKDIR /app
-COPY --from=builder /app/target/sahur-1.0-SNAPSHOT.jar app.jar
+COPY --from=builder /app/target/pocushocus.jar app.jar
 EXPOSE 8080
 CMD ["java", "-jar", "app.jar"]
