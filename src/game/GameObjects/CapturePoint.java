@@ -6,7 +6,7 @@ public class CapturePoint extends Circle {
 
     public int captureState = 2; //0 for team 0, 1 for team 1, 2 for neutral,3 for 0 captured, 4 for 1 captured
     public int captureProgress = 0; //0 to 20
-    public int completionProgress = 0; //0 to 200
+    public int completionProgress = 0; //0 to 300
     public int resetTimer = 30;
     public int prevCaptureState = -1;
     private Integer[][] spawnPoints;
@@ -59,9 +59,9 @@ public class CapturePoint extends Circle {
             } else if (team0 == 0) {
                 // no one present, fall through to switch
             } else {
-                completionProgress += 2*Math.log(team0)+1;
+                completionProgress += Math.log(team0)+1;
                 prevCaptureState = 0;
-                if (completionProgress >= 200) {
+                if (completionProgress >= 300) {
                     captureState = 3;
                 }
             }
@@ -74,9 +74,9 @@ public class CapturePoint extends Circle {
             } else if (team1 == 0) {
                 // no one present, fall through to switch
             } else {
-                completionProgress += 2*Math.log(team1)+1;
+                completionProgress += Math.log(team1)+1;
                 prevCaptureState = 1;
-                if (completionProgress >= 200) {
+                if (completionProgress >= 300) {
                     captureState = 4;
                 }
             }
@@ -88,9 +88,9 @@ public class CapturePoint extends Circle {
         }
         switch (captureState) {
             case 0:
-                return "Team 0 Capturing with "+team0+" players: "+(int)(completionProgress/2)+"%";
+                return "Team 0 Capturing with "+team0+" players: "+(int)(completionProgress/3)+"%";
             case 1:
-                return "Team 1 Capturing with "+team1+" players: "+(int)(completionProgress/2)+"%";
+                return "Team 1 Capturing with "+team1+" players: "+(int)(completionProgress/3)+"%";
             case 2:
                 return "Neutral";
             case 3:
