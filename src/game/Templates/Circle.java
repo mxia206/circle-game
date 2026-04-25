@@ -33,7 +33,7 @@ public class Circle {
     }
     /**
      * Checks collision between two circles
-     * @param ref other circle to reference collision
+     * @param ref other circle to reference collision, ref trajectory is interpolated to prevent tunneling
      * @return
      */
     public boolean collision (Circle ref) {
@@ -47,6 +47,7 @@ public class Circle {
         }
         return false;
     }
+
     /**
      * updates velocity 
      * @param x x velocity

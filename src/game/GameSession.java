@@ -9,9 +9,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import game.Templates.*;
+import game.GameObjects.*;
 import game.Classes.*;
 import game.Projectiles.*;
-import game.GameSession;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,8 +23,10 @@ public class GameSession {
     private final Map<WebSocket, Player> players;
     private final Set<Projectile> projectiles;
     private final Set<Obstacle> obstacles;
-    private final int gamemode; // 0 for free for all, 1 for teams
+    private final CapturePoint capturepoint;
+    private final int gamemode; // 0 for free for all, 1 for teams, 2 for capture point
     private final int sessionId;
+    private int mapDim = 4000;
 
     /**
      * constructs new server
@@ -32,12 +35,28 @@ public class GameSession {
         this.objectMapper = new ObjectMapper();
         this.players = new ConcurrentHashMap<>();
         this.projectiles = Collections.newSetFromMap(new ConcurrentHashMap<>());
-        this.obstacles = new HashSet<Obstacle>();
-        for (int i = 0; i < 30; i++) {
-            this.obstacles.add(new Obstacle(i+"", Math.random()*4000,Math.random()*4000,40 + Math.random()*40));
-        }
+        //gamemode specific inits
         this.gamemode = gamemode;
+        if (gamemode == 2) {
+            mapDim = 8000;
+            this.capturepoint = new CapturePoint(mapDim);
+        } else {
+            this.capturepoint = null;
+        }
+        //obstacle init
+        this.obstacles = new HashSet<Obstacle>();
+        for (int i = 0; gamemode != 2 ? i < 30 : i<160; i++) {
+            this.obstacles.add(new Obstacle(i+"", Math.random()*mapDim,Math.random()*mapDim,40 + Math.random()*50));
+        }
         this.sessionId = sessionId;
+    }
+
+    public void broadcast(String msg) {
+        for (WebSocket ws : players.keySet()) {
+            if (ws.isOpen()) {
+                ws.send(msg);
+            }
+        }
     }
 
     public void handleJoin(WebSocket ws, JsonNode jsonNode) {
@@ -45,8 +64,8 @@ public class GameSession {
         String gameClass = jsonNode.get("class").asText();
         String playerID = UUID.randomUUID().toString();
         Player player;
-        int locx = (int)(Math.random()*4000);
-        int locy = (int)(Math.random()*4000);
+        int locx = (int)(Math.random()*mapDim);
+        int locy = (int)(Math.random()*mapDim);
         switch (gameClass) {
             case "fire":
                 player = new Fire(playerID, name, locx, locy);
@@ -67,8 +86,15 @@ public class GameSession {
                 System.out.println("Error: class " + gameClass + " does not exist");
                 return;
         }  
-        if (gamemode == 1) {
+        if (gamemode == 1 || gamemode == 2) {
             player.team = findSmallestTeam();
+        }
+        if (gamemode == 2) {
+            if (player.team == 0) {
+                player.x = 100; player.y = mapDim/2;
+            } else {
+                player.x = mapDim - 100; player.y = mapDim/2;
+            }
         }
         players.put(ws, player);
         ObjectNode response = objectMapper.createObjectNode();
@@ -79,10 +105,19 @@ public class GameSession {
         System.out.println("Player joined: " + name + " (" + playerID + ")" + "at: " + java.time.LocalDate.now());
     }
 
+    public void removePlayer(WebSocket ws) {
+        if (ws.isOpen()) {
+            ws.send("{\"type\": \"death\"}");
+        }
+        System.out.println("Player removed: " + ws);
+        players.remove(ws); // what the hell this is way beter then finding the index and slicing it out
+    }
+
+
     private int findSmallestTeam() {
         Map<Integer, Integer> teamSizes = new HashMap<>();
         //insert each team into map with size 0
-        if (gamemode == 1) {
+        if (gamemode == 1 || gamemode == 2) {
             for (int i = 0; i < 2; i++) {
                 teamSizes.put(i, 0);
             }
@@ -112,12 +147,12 @@ public class GameSession {
         if (swp != null) {
             for (WebSocket oppws : players.keySet()) {
                 Player opp = players.get(oppws);
-                if (opp.id != pl.id && swp.collision(opp) && !(gamemode == 1 && opp.team == pl.team)) {
+                if (opp.id != pl.id && swp.collision(opp) && !((gamemode == 1 || gamemode == 2) && opp.team == pl.team)) {
                     if (opp.invincible_time == 0) {
                         double dmg_dealt = swp.damage * opp.defense_mult;
                         //blood class shit
                         if (opp.frenzy_time > 0) {
-                            dmg_dealt *= 1.3;
+                            dmg_dealt *= 1.2;
                         }
                         opp.health -= dmg_dealt;
                         opp.stun_time = swp.stun_time;
@@ -144,12 +179,12 @@ public class GameSession {
         Player pl = players.get(ws);
         if (pl == null) return;
         for (Projectile proj : projectiles) {
-            if (!proj.hitPlayers.contains(pl.id) && pl.collision(proj) && !(gamemode == 1 && proj.myPlayer.team == pl.team)) {
+            if (!proj.hitPlayers.contains(pl.id) && pl.collision(proj) && !((gamemode == 1 || gamemode == 2) && proj.myPlayer.team == pl.team)) {
                 if (pl.invincible_time == 0) {
                     double dmg_dealt = proj.damage * pl.defense_mult;
                     //blood class shit
                     if (pl.frenzy_time > 0) {
-                        dmg_dealt *= 1.3;
+                        dmg_dealt *= 1.2;
                     }
                     pl.health -= dmg_dealt;
                     //check projectile effects
@@ -176,6 +211,56 @@ public class GameSession {
             }
         }
     }
+
+    public void getMessage(WebSocket ws, String msg) {
+        try {
+            JsonNode jsonNode = objectMapper.readTree(msg); // what da hell is this
+            String type = jsonNode.get("type").asText();
+
+            // wtf this is just js on steroids
+            switch (type) {
+                case "join":
+                    handleJoin(ws, jsonNode);
+                    break;
+                case "ping":
+                    handlePingMessage(ws, jsonNode);
+                    break;
+                case "move":
+                    handleMovement(ws, jsonNode);
+                    break;
+                case "attack":
+                    handleAttack(ws, jsonNode);
+                    break;
+                default:
+                    System.out.println("what the fuck is this message " + type);
+                    break;
+            }
+        } catch (Exception e) {
+            System.out.println("wwaaaaaa " + e);
+        }
+    }
+    public void handlePingMessage(WebSocket ws, JsonNode jsonNode) {
+        // so uh apparently we have to craft json stuff like this
+        // shouldnt be too big of a deal
+        String msg = "{\"type\": \"ping\"}";
+        ws.send(msg);
+    }
+
+    public void handleMovement(WebSocket ws, JsonNode jsonNode) {
+        if (jsonNode.get("x") == null || jsonNode.get("x").isNull()) return;
+        if (jsonNode.get("y") == null || jsonNode.get("y").isNull()) return;
+        if (jsonNode.get("dir") == null || jsonNode.get("dir").isNull()) return;
+        double x = jsonNode.get("x").asDouble(); // x component
+        double y = jsonNode.get("y").asDouble(); // y component
+        double dir = jsonNode.get("dir").asDouble(); // mouse direction
+
+        Player player = players.get(ws);
+        if (player != null) {
+            player.updateVelocity(x, y);
+            player.last_dir = player.dir;
+            player.dir = dir;
+        }
+    }  
 
     public void handleAttack(WebSocket ws, JsonNode jsonNode) {
         if (jsonNode.get("move") == null || jsonNode.get("move").isNull()) return;
@@ -207,65 +292,6 @@ public class GameSession {
         }   
     }
 
-    public void getMessage(WebSocket ws, String msg) {
-        try {
-            JsonNode jsonNode = objectMapper.readTree(msg); // what da hell is this
-            String type = jsonNode.get("type").asText();
-
-            // wtf this is just js on steroids
-            switch (type) {
-                case "join":
-                    handleJoin(ws, jsonNode);
-                    break;
-                case "ping":
-                    handlePingMessage(ws, jsonNode);
-                    break;
-                case "move":
-                    handleMovement(ws, jsonNode);
-                    break;
-                case "attack":
-                    handleAttack(ws, jsonNode);
-                    break;
-                default:
-                    System.out.println("what the fuck is this message " + type);
-                    break;
-            }
-        } catch (Exception e) {
-            System.out.println("wwaaaaaa " + e);
-        }
-    }
-
-    public void removePlayer(WebSocket ws) {
-        if (ws.isOpen()) {
-            ws.send("{\"type\": \"death\"}");
-        }
-        System.out.println("Player removed: " + ws);
-        players.remove(ws); // what the hell this is way beter then finding the index and slicing it out
-    }
-
-    public void handlePingMessage(WebSocket ws, JsonNode jsonNode) {
-        // so uh apparently we have to craft json stuff like this
-        // shouldnt be too big of a deal
-        String msg = "{\"type\": \"ping\"}";
-        ws.send(msg);
-    }
-
-    public void handleMovement(WebSocket ws, JsonNode jsonNode) {
-        if (jsonNode.get("x") == null || jsonNode.get("x").isNull()) return;
-        if (jsonNode.get("y") == null || jsonNode.get("y").isNull()) return;
-        if (jsonNode.get("dir") == null || jsonNode.get("dir").isNull()) return;
-        double x = jsonNode.get("x").asDouble(); // x component
-        double y = jsonNode.get("y").asDouble(); // y component
-        double dir = jsonNode.get("dir").asDouble(); // mouse direction
-
-        Player player = players.get(ws);
-        if (player != null) {
-            player.updateVelocity(x, y);
-            player.last_dir = player.dir;
-            player.dir = dir;
-        }
-    }  
-
     private void projectileObstacleCollisions(Projectile proj) {
         if (proj == null) return;
         if (proj.type.equals("snowstorm") || proj.type.equals("shockwave")) return;
@@ -292,10 +318,35 @@ public class GameSession {
         }
     }
 
+    private void playerCapturePointInteractions() {
+        int team0 = 0; int team1 = 0;
+        for (Player pl : players.values()) {
+            if (capturepoint.collision(pl)) {
+                System.out.println("player" + pl.name + " at " + pl.x + " " + pl.y + " collided with capture point at " + capturepoint.x + " " + capturepoint.y);
+                if (pl.team == 0) {
+                    team0++;
+                } else if (pl.team == 1) {
+                    team1++;
+                }
+            }
+        }
+        String displayText = capturepoint.updateCaptureState(team0, team1);
+        System.out.println(displayText);
+        ObjectNode resp = objectMapper.createObjectNode();
+        resp.put("type", "capturepoint");
+        resp.put("x", capturepoint.x);
+        resp.put("y", capturepoint.y);
+        resp.put("radius", capturepoint.radius);
+        resp.put("text", displayText);
+        resp.put("captureState", capturepoint.captureState);
+        resp.put("percentage", capturepoint.getBarPercentage());
+        broadcast(resp.toString());
+    }
+
     public void update() {
         for (WebSocket ws : players.keySet()) {
             Player pl = players.get(ws);
-            pl.update();
+            pl.update(mapDim);
             if (pl.lightingspeed_time % 2 == 1) {
                 for (int i = 0; i < 5; i++) {
                     double angle = 2*Math.PI*Math.random();
@@ -309,6 +360,8 @@ public class GameSession {
             projectileObstacleCollisions(p);
             if (p.type.equals("lightningball")) {
                 ((LightningBall)p).computeHoming(players.values(), gamemode);
+            } else if (p.type.equals("clusterfireball")) {
+                ((ClusterFireball)p).computeHoming(players.values(), gamemode);
             }
             p.update();
             if (p.time <= 0) {
@@ -325,6 +378,9 @@ public class GameSession {
                 }
                 projectiles.remove(p);
             }
+        }
+        if (gamemode == 2) {
+            playerCapturePointInteractions();
         }
     }
 
@@ -388,7 +444,7 @@ public class GameSession {
 
     public String packageInitData() {
         ObjectNode resp = objectMapper.createObjectNode();
-        resp.put("type", "obstacles");
+        resp.put("type", "gameStart");
         resp.set("obstacles", objectMapper.valueToTree(
             obstacles.stream().map(ob -> 
                 Map.of(
@@ -399,16 +455,9 @@ public class GameSession {
         );
         resp.put("sessionId", sessionId);
         resp.put("gamemode", gamemode);
+        resp.put("mapDim", mapDim);
         String msg = resp.toString();
         return msg;
-    }
-
-    public void broadcast(String msg) {
-        for (WebSocket ws : players.keySet()) {
-            if (ws.isOpen()) {
-                ws.send(msg);
-            }
-        }
     }
 
     public int getPlayerCount() {

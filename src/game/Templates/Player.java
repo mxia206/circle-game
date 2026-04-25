@@ -57,7 +57,7 @@ public abstract class Player extends Circle {
         super(id, x, y);
         this.name = name;
         this.max_vel = 30.0;
-        radius = 20.0;
+        this.radius = 20.0;
     }
 
     //if type is projectile return projectile set, if melee return sweep
@@ -97,7 +97,7 @@ public abstract class Player extends Circle {
     /**
      * updates all stats and position
      */
-    public void update() {
+    public void update(int mapDim) {
         if (this.slow_time > 0) {
             this.x_vel *= slow;
             this.y_vel *= slow;
@@ -116,14 +116,14 @@ public abstract class Player extends Circle {
         }
         super.update();
         //map bounds
-        if (x >= 4000) {
-            x = 4000;
+        if (x >= mapDim) {
+            x = mapDim;
         }
         if (x <= 0) {
             x = 0;
         }
-        if (y >= 4000) {
-            y = 4000;
+        if (y >= mapDim) {
+            y = mapDim;
         }
         if (y <= 0) {
             y = 0;

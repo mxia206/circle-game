@@ -1,14 +1,12 @@
-/Users/matthewxia/Documents/circle-game/src/game/Circle.java
 /Users/matthewxia/Documents/circle-game/src/game/Classes/Blood.java
 /Users/matthewxia/Documents/circle-game/src/game/Classes/Earth.java
 /Users/matthewxia/Documents/circle-game/src/game/Classes/Fire.java
 /Users/matthewxia/Documents/circle-game/src/game/Classes/Ice.java
 /Users/matthewxia/Documents/circle-game/src/game/Classes/Lightning.java
+/Users/matthewxia/Documents/circle-game/src/game/GameObjects/CapturePoint.java
+/Users/matthewxia/Documents/circle-game/src/game/GameObjects/Obstacle.java
 /Users/matthewxia/Documents/circle-game/src/game/GameServer.java
 /Users/matthewxia/Documents/circle-game/src/game/GameSession.java
-/Users/matthewxia/Documents/circle-game/src/game/Obstacle.java
-/Users/matthewxia/Documents/circle-game/src/game/Player.java
-/Users/matthewxia/Documents/circle-game/src/game/Projectile.java
 /Users/matthewxia/Documents/circle-game/src/game/Projectiles/BloodBlade.java
 /Users/matthewxia/Documents/circle-game/src/game/Projectiles/ChonkyFireball.java
 /Users/matthewxia/Documents/circle-game/src/game/Projectiles/ClusterFireball.java
@@ -20,4 +18,7 @@
 /Users/matthewxia/Documents/circle-game/src/game/Projectiles/LightningSpark.java
 /Users/matthewxia/Documents/circle-game/src/game/Projectiles/Shockwave.java
 /Users/matthewxia/Documents/circle-game/src/game/Projectiles/SnowStorm.java
-/Users/matthewxia/Documents/circle-game/src/game/Sweep.java
+/Users/matthewxia/Documents/circle-game/src/game/Templates/Circle.java
+/Users/matthewxia/Documents/circle-game/src/game/Templates/Player.java
+/Users/matthewxia/Documents/circle-game/src/game/Templates/Projectile.java
+/Users/matthewxia/Documents/circle-game/src/game/Templates/Sweep.java

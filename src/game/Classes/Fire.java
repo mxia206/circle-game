@@ -17,7 +17,7 @@ public class Fire extends Player {
         this.gameClass = "fire";
 
         this.skill1maxcd = 2;
-        this.skill2maxcd = 5;
+        this.skill2maxcd = 10;
         this.skill3maxcd = 100;
     }
     
@@ -48,7 +48,7 @@ public class Fire extends Player {
 
     //big slow cluster fireball
     public Set<Projectile>  skill_3 (double dir) {
-        double manacost = 90.0;
+        double manacost = 70.0;
         if (mana <= manacost || skill3cd > 0) {
             return null;
         }

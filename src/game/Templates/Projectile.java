@@ -39,4 +39,10 @@ public abstract class Projectile extends Circle {
         super.update();
         time--;
     }
+
+    public double wrapAngle(double angle) {
+        while (angle > Math.PI) angle -= (double)(2 * Math.PI);
+        while (angle < -Math.PI) angle += (double)(2 * Math.PI);
+        return angle;
+    }
 }

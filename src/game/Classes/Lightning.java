@@ -17,7 +17,7 @@ public class Lightning extends Player {
         
         this.skill1maxcd = 70;
         this.skill2maxcd = 150;
-        this.skill3maxcd = 40;
+        this.skill3maxcd = 30;
     }
 
     //weakened melee attack
@@ -27,7 +27,7 @@ public class Lightning extends Player {
         }
         if (basicMeleeCD > 0) return null;
         this.basicMeleeCD += 5;
-        return new Sweep(this.x, this.y, dir, 100.0, Math.PI*1.2, 15.0);
+        return new Sweep(this.x, this.y, dir, 100.0, Math.PI*1.2, 16.0);
     }
 
     //homing stunning lightning ball
@@ -35,7 +35,7 @@ public class Lightning extends Player {
         if (this.lightingspeed_time > 0) {
             return null;
         }
-        double manacost =20.0;
+        double manacost = 20.0;
         if (mana <= manacost || skill1cd > 0) {
             return null;
         }

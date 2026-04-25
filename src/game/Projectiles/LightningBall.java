@@ -15,12 +15,6 @@ public class LightningBall extends Projectile {
         this.type = "lightningball";
     }
 
-    private double wrapAngle(double angle) {
-        while (angle > Math.PI) angle -= (double)(2 * Math.PI);
-        while (angle < -Math.PI) angle += (double)(2 * Math.PI);
-        return angle;
-    }
-
     public void computeHoming(Collection<Player> c, int gamemode) {
         Player closestPlayer = null; double dist = 10000.0;
         for (Player pl : c) {

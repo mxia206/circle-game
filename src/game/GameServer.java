@@ -9,10 +9,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import game.Classes.*;
-import game.Projectiles.*;
-import game.GameSession;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,6 +33,7 @@ public class GameServer extends WebSocketServer {
         this.sessions = new ConcurrentHashMap<>();
         sessions.put(0, new GameSession(0,0));
         sessions.put(1, new GameSession(1,1));
+        sessions.put(2, new GameSession(2,2));
     }
 
     private static int getEnvPort() {

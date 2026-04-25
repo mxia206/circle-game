@@ -14,6 +14,7 @@ public class Blood extends Player {
         mana_regen = 1.5;
         health_regen = 0.6;
         this.gameClass = "blood";
+        this.defense_mult = 1.1;
         
         this.skill1maxcd = 10;
         this.skill2maxcd = 5;
