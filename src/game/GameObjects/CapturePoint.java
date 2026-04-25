@@ -116,7 +116,7 @@ public class CapturePoint extends Circle {
 
     public int getBarPercentage() {
         if (captureState == 0 || captureState == 1) {
-            return (int)(completionProgress/2);
+            return (int)(completionProgress/3);
         } else if (captureState == 2) {
             return (int)(captureProgress*5);
         } else {
