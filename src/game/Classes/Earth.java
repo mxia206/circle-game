@@ -28,7 +28,7 @@ public class Earth extends Player {
         if (basicMeleeCD > 0) return null;
         this.basicMeleeCD += 5;
         if (basicEnhanced) {
-            Sweep res = new Sweep(this.x, this.y, dir, 100.0, Math.PI*1.2, 30.0);
+            Sweep res = new Sweep(this.x, this.y, dir, 100.0, Math.PI*1.2, 25.0);
             res.stun_time = 10;
             skill1cd = skill1maxcd;
             basicEnhanced = false;
