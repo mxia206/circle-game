@@ -25,19 +25,29 @@ public class CapturePoint extends Circle {
         System.out.println("team0: "+team0+" team1: "+team1+" captureState: "+captureState+" captureProgress: "+captureProgress+" completionProgress: "+completionProgress);
         if (captureState == 2) {
             if (team1 > 0 && team0 == 0) {
-                captureProgress++;
-                if (captureProgress >= 20) {
+                if (prevCaptureState == 1) {
                     captureState = 1;
                     captureProgress = 0;
-                    completionProgress = 0;
+                } else {
+                    captureProgress++;
+                    if (captureProgress >= 20) {
+                        captureState = 1;
+                        captureProgress = 0;
+                        completionProgress = 0;
+                    }
                 }
                 return "Team 1 Capturing: "+(int)(captureProgress*5)+"%";
             } else if (team0 > 0 && team1 == 0) {
-                captureProgress++;
-                if (captureProgress >= 20) {
+                if (prevCaptureState == 0) {
                     captureState = 0;
                     captureProgress = 0;
-                    completionProgress = 0;
+                } else {
+                    captureProgress++;
+                    if (captureProgress >= 20) {
+                        captureState = 0;
+                        captureProgress = 0;
+                        completionProgress = 0;
+                    }
                 }
                 return "Team 0 Capturing: "+(int)(captureProgress*5)+"%";
             } else if (team0 > 0 && team1 > 0) {
