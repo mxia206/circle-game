@@ -87,7 +87,11 @@ public class GameSession {
                 return;
         }  
         if (gamemode == 1 || gamemode == 2) {
-            player.team = findSmallestTeam();
+            if (jsonNode.has("team")) {
+                player.team = jsonNode.get("team").asInt();
+            } else {
+                player.team = findSmallestTeam();
+            }
         }
         if (gamemode == 2) {
             if (player.team == 0) {
