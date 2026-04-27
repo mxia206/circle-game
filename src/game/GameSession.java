@@ -82,6 +82,9 @@ public class GameSession {
             case "lightning":
                 player = new Lightning(playerID, name, locx, locy);
                 break;
+            case "void":
+                player = new game.Classes.Void(playerID, name, locx, locy);
+                break;
             default:
                 System.out.println("Error: class " + gameClass + " does not exist");
                 return;
@@ -196,7 +199,9 @@ public class GameSession {
                     pl.slow_time = proj.slow_time;
                     pl.stun_time = proj.stun_time;
                 }
-                proj.hitPlayers.add(pl.id);
+                if (!proj.multhit) {
+                    proj.hitPlayers.add(pl.id);
+                }
                 if (pl.health <= 0.0) {
                     proj.myPlayer.killcount++;
                     removePlayer(ws);
@@ -210,6 +215,16 @@ public class GameSession {
                 if (proj.type.equals("iceblade") && proj.time > 45) {
                     pl.x = proj.x; pl.y = proj.y;
                     proj.time = 45;
+                }
+                //void pull pulls in player
+                if (proj.type.equals("voidpull")) {
+                    pl.x = proj.x+proj.x_vel; pl.y = proj.y+proj.y_vel;
+                }
+                //black hole sucks in player towards the center
+                if (proj.type.equals("blackhole")) {
+                    double pull_dir = Math.atan2(proj.y-pl.y, proj.x-pl.x);
+                    pl.x += 15*Math.cos(pull_dir);
+                    pl.y += 15*Math.sin(pull_dir);
                 }
                 pl.combat_time = 50;
             }
@@ -366,6 +381,10 @@ public class GameSession {
                 ((LightningBall)p).computeHoming(players.values(), gamemode);
             } else if (p.type.equals("clusterfireball")) {
                 ((ClusterFireball)p).computeHoming(players.values(), gamemode);
+            } else if (p.type.equals("voidorb")) {
+                ((VoidOrb)p).computeHoming(players.values(), gamemode);
+            } else if (p.type.equals("voidpull")) {
+                ((VoidPull)p).computeHoming();
             }
             p.update();
             if (p.time <= 0) {

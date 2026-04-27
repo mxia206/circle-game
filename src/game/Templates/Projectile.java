@@ -10,6 +10,7 @@ public abstract class Projectile extends Circle {
     public Set<String> hitPlayers;
     public Player myPlayer;
     public String type;
+    public Boolean multhit = false;
 
     //slow effect
     public double slow = 1.0;

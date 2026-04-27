@@ -1,10 +1,13 @@
 game/CapturePoint.class
 game/Projectiles/Shockwave.class
+game/Projectiles/VoidOrb.class
 game/Projectiles/ChonkyFireball.class
 game/Player.class
 game/GameServer.class
+game/Classes/Void.class
 game/Projectiles/LightningSpark.class
 game/Classes/Fire.class
+game/Projectiles/VoidPull.class
 game/GameServer$1.class
 game/GameSession.class
 game/Projectiles/Fireball.class
@@ -22,4 +25,5 @@ game/Projectiles/SnowStorm.class
 game/Classes/Lightning.class
 game/Obstacle.class
 game/Circle.class
+game/Projectiles/BlackHole.class
 game/Projectiles/IceBlade.class
