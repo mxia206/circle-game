@@ -317,7 +317,7 @@ public class GameSession {
         if (proj == null) return;
         if (proj.type.equals("snowstorm") || proj.type.equals("shockwave")) return;
         for (Obstacle ob : obstacles) {
-            if (proj.collision(ob)) {
+            if (ob.collision(proj)) {
                 if (proj.type.equals("iceblade")) {
                     if (proj.time > 47) {
                         proj.time = 47;
@@ -333,7 +333,7 @@ public class GameSession {
         Player pl = players.get(ws);
         if (pl == null) return;
         for (Obstacle ob : obstacles) {
-            if (pl.collision(ob)) {
+            if (ob.collision(pl)) {
                 pl.obstacleCollision(ob);
             }
         }
