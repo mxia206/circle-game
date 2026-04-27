@@ -17,7 +17,7 @@ public class Lightning extends Player {
         
         this.skill1maxcd = 70;
         this.skill2maxcd = 150;
-        this.skill3maxcd = 30;
+        this.skill3maxcd = 40;
     }
 
     //weakened melee attack

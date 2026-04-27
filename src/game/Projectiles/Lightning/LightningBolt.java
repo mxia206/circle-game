@@ -9,7 +9,6 @@ public class LightningBolt extends Projectile {
         this.time = 10;
         this.radius = 18.0;
         this.damage = 30.0;
-        this.stun_time = 10;
         this.type = "lightningbolt";
     }
 
