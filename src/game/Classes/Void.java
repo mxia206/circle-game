@@ -24,7 +24,7 @@ public class Void extends Player {
 
     //void orbs
     public Set<Projectile> skill_1 (double dir) {
-        double manacost = 20.0;
+        double manacost = 25.0;
         if (mana <= manacost || skill1cd > 0) {
             return null;
         }
