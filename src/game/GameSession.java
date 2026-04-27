@@ -223,8 +223,10 @@ public class GameSession {
                 //black hole sucks in player towards the center
                 if (proj.type.equals("blackhole")) {
                     double pull_dir = Math.atan2(proj.y-pl.y, proj.x-pl.x);
-                    pl.x += 15*Math.cos(pull_dir);
-                    pl.y += 15*Math.sin(pull_dir);
+                    double pull_dist = Math.hypot(proj.x-pl.x, proj.y-pl.y);
+                    double pull_strength = 5+(250-pull_dist)/17;
+                    pl.x += pull_strength*Math.cos(pull_dir);
+                    pl.y += pull_strength*Math.sin(pull_dir);
                 }
                 pl.combat_time = 50;
             }

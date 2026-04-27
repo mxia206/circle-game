@@ -98,23 +98,28 @@ public abstract class Player extends Circle {
      * updates all stats and position
      */
     public void update(int mapDim) {
+        double tx_vel = this.x_vel; double ty_vel = this.y_vel;
         if (this.slow_time > 0) {
-            this.x_vel *= slow;
-            this.y_vel *= slow;
+            tx_vel *= slow;
+            ty_vel *= slow;
         }
         if (this.frenzy_time > 0) {
-            this.x_vel *= 1.3;
-            this.y_vel *= 1.3;
+            tx_vel *= 1.3;
+            ty_vel *= 1.3;
         }
         if (this.lightingspeed_time > 0) {
-            this.x_vel *= 1.15;
-            this.y_vel *= 1.15;
+            tx_vel *= 1.15;
+            ty_vel *= 1.15;
         }
         if (this.stun_time > 0) {
-            this.x_vel = 0;
-            this.y_vel = 0;
+            tx_vel = 0;
+            ty_vel = 0;
         }
-        super.update();
+        //update
+        last_x = x;
+        last_y = y;
+        x += tx_vel;
+        y += ty_vel;
         //map bounds
         if (x >= mapDim) {
             x = mapDim;
