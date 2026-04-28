@@ -15,7 +15,7 @@ public class VoidOrb extends Projectile {
     }
 
     public void update() {
-        if (time % 3 == 0) {
+        if (time % 7 == 0) {
             this.hitPlayers.clear();
             this.hitPlayers.add(this.myPlayer.id);
         }
