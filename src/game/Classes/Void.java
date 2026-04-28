@@ -16,7 +16,7 @@ public class Void extends Player {
         health_regen = 0.5;
         this.gameClass = "void";
 
-        this.skill1maxcd = 8;
+        this.skill1maxcd = 7;
         this.skill2maxcd = 50;
         this.skill3maxcd = 200;
     }

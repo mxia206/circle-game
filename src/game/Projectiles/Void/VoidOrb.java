@@ -8,14 +8,14 @@ import game.*;
 public class VoidOrb extends Projectile {
     public VoidOrb(String id, double x_pos, double y_pos, double dir, Player pl) {
         super(id, x_pos, y_pos, 40.0*Math.cos(dir), 40.0*Math.sin(dir), 40.0, pl);
-        this.time = 30;
+        this.time = 20;
         this.radius = 10.0;
         this.damage = 3.0;
         this.type = "voidorb";
     }
 
     public void update() {
-        if (time % 7 == 0) {
+        if (time % 5 == 0) {
             this.hitPlayers.clear();
             this.hitPlayers.add(this.myPlayer.id);
         }

@@ -228,38 +228,66 @@ public class GameSession {
                     pl.x += pull_strength*Math.cos(pull_dir);
                     pl.y += pull_strength*Math.sin(pull_dir);
                 }
+                //void orb extends duration on hit
+                if (proj.type.equals("voidorb")) {
+                    proj.time += 5;
+                }
                 pl.combat_time = 50;
             }
         }
     }
 
-    public void getMessage(WebSocket ws, String msg) {
-        try {
-            JsonNode jsonNode = objectMapper.readTree(msg); // what da hell is this
-            String type = jsonNode.get("type").asText();
-
-            // wtf this is just js on steroids
-            switch (type) {
-                case "join":
-                    handleJoin(ws, jsonNode);
-                    break;
-                case "ping":
-                    handlePingMessage(ws, jsonNode);
-                    break;
-                case "move":
-                    handleMovement(ws, jsonNode);
-                    break;
-                case "attack":
-                    handleAttack(ws, jsonNode);
-                    break;
-                default:
-                    System.out.println("what the fuck is this message " + type);
-                    break;
+      private void projectileObstacleCollisions(Projectile proj) {
+        if (proj == null) return;
+        if (proj.type.equals("snowstorm") || proj.type.equals("shockwave") || proj.type.equals("blackhole")) return;
+        for (Obstacle ob : obstacles) {
+            if (ob.collision(proj)) {
+                if (proj.type.equals("iceblade")) {
+                    if (proj.time > 47) {
+                        proj.time = 47;
+                    }
+                } else {
+                    proj.time = 0;
+                }
             }
-        } catch (Exception e) {
-            System.out.println("wwaaaaaa " + e);
         }
     }
+
+    private void playerObstacleCollisions(WebSocket ws) {
+        Player pl = players.get(ws);
+        if (pl == null) return;
+        for (Obstacle ob : obstacles) {
+            if (ob.collision(pl)) {
+                pl.obstacleCollision(ob);
+            }
+        }
+    }
+
+    private void playerCapturePointInteractions() {
+        int team0 = 0; int team1 = 0;
+        for (Player pl : players.values()) {
+            if (capturepoint.collision(pl)) {
+                System.out.println("player" + pl.name + " at " + pl.x + " " + pl.y + " collided with capture point at " + capturepoint.x + " " + capturepoint.y);
+                if (pl.team == 0) {
+                    team0++;
+                } else if (pl.team == 1) {
+                    team1++;
+                }
+            }
+        }
+        String displayText = capturepoint.updateCaptureState(team0, team1);
+        System.out.println(displayText);
+        ObjectNode resp = objectMapper.createObjectNode();
+        resp.put("type", "capturepoint");
+        resp.put("x", capturepoint.x);
+        resp.put("y", capturepoint.y);
+        resp.put("radius", capturepoint.radius);
+        resp.put("text", displayText);
+        resp.put("captureState", capturepoint.captureState);
+        resp.put("percentage", capturepoint.getBarPercentage());
+        broadcast(resp.toString());
+    }
+
     public void handlePingMessage(WebSocket ws, JsonNode jsonNode) {
         // so uh apparently we have to craft json stuff like this
         // shouldnt be too big of a deal
@@ -313,55 +341,32 @@ public class GameSession {
         }   
     }
 
-    private void projectileObstacleCollisions(Projectile proj) {
-        if (proj == null) return;
-        if (proj.type.equals("snowstorm") || proj.type.equals("shockwave")) return;
-        for (Obstacle ob : obstacles) {
-            if (ob.collision(proj)) {
-                if (proj.type.equals("iceblade")) {
-                    if (proj.time > 47) {
-                        proj.time = 47;
-                    }
-                } else {
-                    proj.time = 0;
-                }
-            }
-        }
-    }
+    public void getMessage(WebSocket ws, String msg) {
+        try {
+            JsonNode jsonNode = objectMapper.readTree(msg); // what da hell is this
+            String type = jsonNode.get("type").asText();
 
-    private void playerObstacleCollisions(WebSocket ws) {
-        Player pl = players.get(ws);
-        if (pl == null) return;
-        for (Obstacle ob : obstacles) {
-            if (ob.collision(pl)) {
-                pl.obstacleCollision(ob);
+            // wtf this is just js on steroids
+            switch (type) {
+                case "join":
+                    handleJoin(ws, jsonNode);
+                    break;
+                case "ping":
+                    handlePingMessage(ws, jsonNode);
+                    break;
+                case "move":
+                    handleMovement(ws, jsonNode);
+                    break;
+                case "attack":
+                    handleAttack(ws, jsonNode);
+                    break;
+                default:
+                    System.out.println("what the fuck is this message " + type);
+                    break;
             }
+        } catch (Exception e) {
+            System.out.println("wwaaaaaa " + e);
         }
-    }
-
-    private void playerCapturePointInteractions() {
-        int team0 = 0; int team1 = 0;
-        for (Player pl : players.values()) {
-            if (capturepoint.collision(pl)) {
-                System.out.println("player" + pl.name + " at " + pl.x + " " + pl.y + " collided with capture point at " + capturepoint.x + " " + capturepoint.y);
-                if (pl.team == 0) {
-                    team0++;
-                } else if (pl.team == 1) {
-                    team1++;
-                }
-            }
-        }
-        String displayText = capturepoint.updateCaptureState(team0, team1);
-        System.out.println(displayText);
-        ObjectNode resp = objectMapper.createObjectNode();
-        resp.put("type", "capturepoint");
-        resp.put("x", capturepoint.x);
-        resp.put("y", capturepoint.y);
-        resp.put("radius", capturepoint.radius);
-        resp.put("text", displayText);
-        resp.put("captureState", capturepoint.captureState);
-        resp.put("percentage", capturepoint.getBarPercentage());
-        broadcast(resp.toString());
     }
 
     public void update() {
